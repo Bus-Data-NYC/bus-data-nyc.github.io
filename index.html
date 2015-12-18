@@ -1,3263 +1,393 @@
-
-<!-- index.html -->
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Bus Transit Data</title>
+<html >
+<head>
+<meta charset="UTF-8">
+<title>London Bus</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
 
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/normalize.css">
 
-    <style type="text/css">
-    	.bus-lapel {
-    		line-height: 3;
-    		padding: 10px;
-    		font-size: 1em;
-    		cursor: pointer;
-		    -webkit-transition: all 200ms ease-o
-		    -ms-transition: all 200ms ease-out;
-		    -moz-transition: all 200ms ease-out;
-		    transition: all 200ms ease-out;
-    	}
-    	.bus-lapel:not(:last-child) {
-    		margin-right: 5px;
-    	}
-			.dev-access:hover, .bus-lapel:hover {
-				box-shadow: 0px 0px 15px rgba(0,0,0,0.5);
-		    animation: pulse 2s ease infinite;
-			}
 
-			@keyframes pulse {
-			  0% { transform: scale(1); }
-			  50% { transform: scale(1.05); }
-			  100% { transform: scale(1); }
-			}
+<style>
+/* NOTE: The styles were added inline because Prefixfree needs access to your styles and they must be inlined if they are on local disk! */
+/*Credit where its due: This cute little animation is a modification of this one CodePen: http://codepen.io/anon/pen/KVzmvz*/
 
-    	.twitter-typeahead {
-    		float: left;
-    		width: 100%;
-    	}
-			.tt-menu {
-			  width: 100px;
-			  padding: 8px 0;
-			  background-color: #fff;
-			  border: 1px solid #ccc;
-			  border: 1px solid rgba(0, 0, 0, 0.2);
-			  -webkit-border-radius: 3px;
-			     -moz-border-radius: 3px;
-			          border-radius: 3px;
-			  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
-			     -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
-			          box-shadow: 0 5px 10px rgba(0,0,0,.2);
-			}
-			.tt-suggestion {
-			  padding: 3px 10px;
-			}
-			.tt-suggestion:hover {
-			  cursor: pointer;
-			  color: #fff;
-			  background-color: #0097cf;
-			}
-			.tt-suggestion.tt-cursor {
-			  color: #fff;
-			  background-color: #0097cf;
-			}
-			.tt-suggestion p {
-			  margin: 0;
-			}
-    </style>
+body {
+height: 100%;
+overflow:hidden;
 
-  </head>
-  <body>
+}
 
-  	<div class="container" style="margin-top: 20px">
-  		
-  		<div class="row">
-	  		<div class="col-sm-5 col-xs-12">
-	  			<h1><b>Bus Data API</b></h1>
-	  		</div>
+#title {
+position: fixed;
+top: 50px;
+text-align: center;
+width: 100%;
+font-family: Avant Garde,Avantgarde,Century Gothic,CenturyGothic,AppleGothic,sans-serif; 
+font-weight: 900;
+color:#566c73;
+opacity: 0.6;
+}
 
-				<div class="col-sm-7 col-xs-12" style="margin-top:20px">
-					<div class="input-group" id="routes_search">
-						<span class="input-group-addon">
-							<span class="glyphicon glyphicon-search"></span>
-							Search routes
-						</span>
-						<input type="text" class="form-control typeahead" 
-										id="route-query" placeholder="Search for...">
-						<span class="input-group-btn" >
-							<button class="btn btn-info" type="button"
-												onclick="gotoroute()">
-								Get Route Data
-							</button>
-						</span>
-					</div>
-				</div>
-			</div>
+#road {
+width: 100%;
+height: 150px;
+background-color: #4a3e4a;
+position: absolute;
+bottom: 0;
+border-top: 10px #626473 solid;
+}
 
-			<div class="alert alert-success">
-			  <strong>Welcome!</strong> Thanks for checking out the Bus Data API. The main service is <a href="http://104.208.241.41/">located here</a>. The below content is a preview of the <a href="http://104.208.241.41/">main site</a> and is representative of the MTA's bus system as of October 2015.
-			</div>
+#road ul {
+width: 2000%; 
+list-style: none;
+}
 
-			
-  		<div id="routes">
-  			<h3>
-  				Browse all routes
-  				<small class="label label-default small pull-right dev-access" 
-  								style="color:#FFF; cursor: pointer;"
-  								onclick="godevportal()">
-  					<span class="glyphicon glyphicon-transfer"></span>
-  					Developer Access
-  				</small>
-  			</h3>
-  			
-  				<div class="panel panel-default">
-	  				<div class="panel-heading">
-	  					<b>Bronx<b>
-	  				</div>
-	  				<div class="panel-body">
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX1"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX1')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Grand Concourse / E 138th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx001cur.pdf">
-			  					BX1
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX10"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX10')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Riverdale Av / W 231st St / Jerome Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx010cur.pdf">
-			  					BX10
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX11"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX11')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Claremont Pkwy / E 170th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx011cur.pdf">
-			  					BX11
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX12"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX12')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Pelham Pkwy / Fordham Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx012cur.pdf">
-			  					BX12
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX12+"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX12+')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="Select Bus Service via Pelham Pkwy / Fordham Rd / Bay Plaza Shop Ctr" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx012scur.pdf">
-			  					BX12+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX13"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX13')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Ogden Av / W 181st St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx013cur.pdf">
-			  					BX13
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX15"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX15')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via 3rd Av / 125th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx015cur.pdf">
-			  					BX15
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX16"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX16')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E 233rd St / Nereid Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx016cur.pdf">
-			  					BX16
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX17"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX17')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Crotona Av / Prospect Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx017cur.pdf">
-			  					BX17
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX18"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX18')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Macombs Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx018cur.pdf">
-			  					BX18
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX19"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX19')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Southern Blvd / E 149th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx019cur.pdf">
-			  					BX19
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX2"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX2')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Grand Concourse / E 149th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b002cur.pdf">
-			  					BX2
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX20"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX20')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Broadway / Henry Hudson Pkwy" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx020cur.pdf">
-			  					BX20
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX21"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX21')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Morris Park Av / Boston Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx021cur.pdf">
-			  					BX21
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX22"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX22')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Castle Hill Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx022cur.pdf">
-			  					BX22
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX23"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX23')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/bx023cur.pdf">
-			  					BX23
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX24"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX24')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Country Club Loop" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx024cur.pdf">
-			  					BX24
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX26"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX26')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Allerton Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx026cur.pdf">
-			  					BX26
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX27"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX27')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Westchester Av / Soundview Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx027cur.pdf">
-			  					BX27
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX28"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX28')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E Gun Hill Rd / Bartow Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx028cur.pdf">
-			  					BX28
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX29"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX29')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via City Island Rd / City Island Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx029cur.pdf">
-			  					BX29
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX3"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX3')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via University Av / W 181st St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx003cur.pdf">
-			  					BX3
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX30"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX30')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Boston Rd / E Gun Hill Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx030cur.pdf">
-			  					BX30
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX31"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX31')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Eastchester Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx031cur.pdf">
-			  					BX31
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX32"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX32')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Morris Av / Jerome Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx032cur.pdf">
-			  					BX32
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX33"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX33')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E 138th St / W 135th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx033cur.pdf">
-			  					BX33
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX34"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX34')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Bainbridge Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx034cur.pdf">
-			  					BX34
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX35"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX35')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E 167th / W 181st St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx035cur.pdf">
-			  					BX35
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX36"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX36')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E 174th / E 180th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx036cur.pdf">
-			  					BX36
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX38"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX38')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E Gun Hill Rd / Co-op City Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b038cur.pdf">
-			  					BX38
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX39"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX39')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via White Plains Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx039cur.pdf">
-			  					BX39
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX4"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX4')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Westchester Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx004cur.pdf">
-			  					BX4
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX40"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX40')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Tremont Av Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx040cur.pdf">
-			  					BX40
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX41"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX41')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Webster Av / E Gun Hill Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx041cur.pdf">
-			  					BX41
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX41+"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX41+')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via East Gun Hill Rd/White Plains Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx041scur.pdf">
-			  					BX41+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX42"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX42')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Tremont Av Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx040cur.pdf">
-			  					BX42
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX46"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX46')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Barretto PK" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx046cur.pdf">
-			  					BX46
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX4A"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX4A')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Metropolitan Oval / Westchester Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx004cur.pdf">
-			  					BX4A
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX5"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX5')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Bruckner Blvd Svc Rd / Story Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx005cur.pdf">
-			  					BX5
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX6"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX6')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via E 161st St / E 163rd St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx006cur.pdf">
-			  					BX6
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX7"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX7')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Riverdale Av / Broadway" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx007cur.pdf">
-			  					BX7
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX8"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX8')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Bronxwood Av / Williamsbridge Rd / Crosby Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx008cur.pdf">
-			  					BX8
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "BX9"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('BX9')"
-			  							api-route-boro="Bronx" 
-			  							api-route-desc="via Broadway / Kingsbridge Rd / Southern Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bronx/bx009cur.pdf">
-			  					BX9
-			  				</span>
-			  			
-		  			</div>
-		  			<div class="panel-footer" style="font-weight: 200;"
-		  						id="panel_footer_Bronx">
-		  				Additional information appears here when you hover over a bus route.
-		  			</div>
-		  		</div>
-	  		
-  				<div class="panel panel-default">
-	  				<div class="panel-heading">
-	  					<b>Brooklyn<b>
-	  				</div>
-	  				<div class="panel-body">
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B1"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B1')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 86th St / Ocean Pkwy" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b001cur.pdf">
-			  					B1
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B2"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B2')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Avenue R / Avenue S" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b002cur.pdf">
-			  					B2
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B3"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B3')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Avenue U" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b003cur.pdf">
-			  					B3
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B4"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B4')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bay Ridge Pkwy / 86th St / Avenue Z" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b004cur.pdf">
-			  					B4
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B6"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B6')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bay Pkwy / Avenue J / Flatlands Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b006cur.pdf">
-			  					B6
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B7"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B7')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Kings Hwy / Saratoga Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b007cur.pdf">
-			  					B7
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B8"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B8')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 18th Av / Foster Av / Avenue D" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b008cur.pdf">
-			  					B8
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B9"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B9')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 60th St / Avenue M" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b009cur.pdf">
-			  					B9
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B11"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B11')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 49th &amp; 50th St / Avenue J" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b011cur.pdf">
-			  					B11
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B12"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B12')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Clarkson Av / Empire Blvd / East New York Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b012cur.pdf">
-			  					B12
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B13"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B13')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Crescent St / Jamaica Av / Wyckoff Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b013cur.pdf">
-			  					B13
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B14"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B14')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Sutter Av / Pitkin Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b014cur.pdf">
-			  					B14
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B15"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B15')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Marcus Garvey Blvd / New Lots Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b015cur.pdf">
-			  					B15
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B16"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B16')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Ft Hamilton Pkwy / 13th &amp; 14th Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b016cur.pdf">
-			  					B16
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B17"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B17')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Remsen Av / Seaview Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b017cur.pdf">
-			  					B17
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B20"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B20')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Pennsylvania Av / Decatur St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b020cur.pdf">
-			  					B20
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B24"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B24')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Greenpoint Av &amp; 48th St / Meeker Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b024cur.pdf">
-			  					B24
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B25"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B25')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Fulton St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b025cur.pdf">
-			  					B25
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B26"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B26')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Halsey St / Fulton St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b026cur.pdf">
-			  					B26
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B31"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B31')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Gerrisen Av / Avenue R" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b031cur.pdf">
-			  					B31
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B32"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B32')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Kent Av / Wythe Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b032cur.pdf">
-			  					B32
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B35"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B35')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Church Av / 39th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b035cur.pdf">
-			  					B35
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B36"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B36')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Avenue Z / Surf Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b036cur.pdf">
-			  					B36
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B37"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B37')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 3rd Av / 39th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b037cur.pdf">
-			  					B37
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B38"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B38')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via DeKalb &amp; Lafayette Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b038cur.pdf">
-			  					B38
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B41"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B41')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Flatbush Av / Livingston St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b041cur.pdf">
-			  					B41
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B42"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B42')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Rockaway Pkwy" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b042cur.pdf">
-			  					B42
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B43"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B43')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Manhattan Av / Graham Av / Tompkins Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b043cur.pdf">
-			  					B43
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B44"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B44')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Nostrand Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b044cur.pdf">
-			  					B44
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B44+"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B44+')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="Select Bus Service via Nostrand Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b044scur.pdf">
-			  					B44+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B45"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B45')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via St Johns Place" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b045cur.pdf">
-			  					B45
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B46"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B46')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Utica Av - Malcolm X Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b046cur.pdf">
-			  					B46
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B47"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B47')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Broadway / Ralph Av / Avenue U" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b047cur.pdf">
-			  					B47
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B48"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B48')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Lorimer St / Franklin &amp; Classon Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b048cur.pdf">
-			  					B48
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B49"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B49')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Ocean Av / Bedford &amp; Rogers Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b049cur.pdf">
-			  					B49
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B52"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B52')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Gates Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b052cur.pdf">
-			  					B52
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B54"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B54')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Myrtle Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b054cur.pdf">
-			  					B54
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B57"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B57')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Flushing Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b057cur.pdf">
-			  					B57
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B60"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B60')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Wilson Av / Rockaway Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b060cur.pdf">
-			  					B60
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B61"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B61')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Van Brunt St / Columbia St / 9th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b061cur.pdf">
-			  					B61
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B62"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B62')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bklyn Navy Yard / Manhattan Av / Jackson Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b062cur.pdf">
-			  					B62
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B63"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B63')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 5th Av / Atlantic Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b063cur.pdf">
-			  					B63
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B64"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B64')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bay Ridge Av / Bath Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b064cur.pdf">
-			  					B64
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B65"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B65')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bergen St &amp; Dean St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b065cur.pdf">
-			  					B65
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B67"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B67')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Flatbush Av / 7th Av / McDonald Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b067cur.pdf">
-			  					B67
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B68"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B68')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Coney Island Av / Brighton Beach Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b068cur.pdf">
-			  					B68
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B69"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B69')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Vanderbilt Av / 7th Av / McDonald Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b068cur.pdf">
-			  					B69
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B70"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B70')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via 92nd St / 3rd Av / 8th Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b070cur.pdf">
-			  					B70
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B74"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B74')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Mermaid Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b074cur.pdf">
-			  					B74
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B82"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B82')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Bay Pkwy / Kings Hwy / Flatlands Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b082cur.pdf">
-			  					B82
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B83"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B83')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Van Siclen Av / Pennsylvania Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b083cur.pdf">
-			  					B83
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B84"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B84')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Ashford Street/Flatlands Avenue" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/bkln/b084cur.pdf">
-			  					B84
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B100"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B100')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via E 66th St / Fillmore Av / Quentin Rd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/b100cur.pdf">
-			  					B100
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "B103"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('B103')"
-			  							api-route-boro="Brooklyn" 
-			  							api-route-desc="via Livingston St / Cortelyou Rd / Ave H" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/b103cur.pdf">
-			  					B103
-			  				</span>
-			  			
-		  			</div>
-		  			<div class="panel-footer" style="font-weight: 200;"
-		  						id="panel_footer_Brooklyn">
-		  				Additional information appears here when you hover over a bus route.
-		  			</div>
-		  		</div>
-	  		
-  				<div class="panel panel-default">
-	  				<div class="panel-heading">
-	  					<b>Manhattan<b>
-	  				</div>
-	  				<div class="panel-body">
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M1"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M1')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 5th Av / Madison Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m001cur.pdf">
-			  					M1
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M2"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M2')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 5th Av / Madison Av / AC Powell Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m002cur.pdf">
-			  					M2
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M3"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M3')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 5th Av / Madison Av / St Nicholas Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m003cur.pdf">
-			  					M3
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M4"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M4')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 5th Av / Madison Av / Broadway" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m004cur.pdf">
-			  					M4
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M5"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M5')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 5th Av / Av of Americas / Riverside Dr" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m005cur.pdf">
-			  					M5
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M7"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M7')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Columbus / Amsterdam / 6 &amp; 7 Av / Bway" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m007cur.pdf">
-			  					M7
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M8"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M8')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 8 &amp; 9 St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m008cur.pdf">
-			  					M8
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M9"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M9')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Avenue C / E Broadway" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m009cur.pdf">
-			  					M9
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M10"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M10')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Central Park West / Frederick Douglass Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m010cur.pdf">
-			  					M10
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M11"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M11')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 9th - Columbus Av / 10th - Amsterdam Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m011cur.pdf">
-			  					M11
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M12"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M12')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 11 Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://www.mta.info/nyct/bus/schedule/manh/m015scur.pdf">
-			  					M12
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M14A"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M14A')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 14th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m014cur.pdf">
-			  					M14A
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M14D"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M14D')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 14th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m014cur.pdf">
-			  					M14D
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M15"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M15')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 1st Av / 2nd Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m015cur.pdf">
-			  					M15
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M15+"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M15+')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="Select Bus Service via 1st Av / 2nd Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m015scur.pdf">
-			  					M15+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M20"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M20')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 7th Av / 8th Av / Battery Park City" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m020cur.pdf">
-			  					M20
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M21"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M21')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Houston St / Avenue C" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m021cur.pdf">
-			  					M21
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M22"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M22')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Madison St / Chambers St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m022cur.pdf">
-			  					M22
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M23"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M23')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 23rd St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m023cur.pdf">
-			  					M23
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M31"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M31')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 57th St / York Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m031cur.pdf">
-			  					M31
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M34+"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M34+')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="Select Bus Service via 34th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m034scur.pdf">
-			  					M34+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M34A+"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M34A+')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="Select Bus Service via 34th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m034scur.pdf">
-			  					M34A+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M35"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M35')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Randall&#39;s Island / RFK Bridge" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m035cur.pdf">
-			  					M35
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M42"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M42')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 42nd St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m042cur.pdf">
-			  					M42
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M50"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M50')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 49th St / 50th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m050cur.pdf">
-			  					M50
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M57"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M57')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 57th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m057cur.pdf">
-			  					M57
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M60+"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M60+')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 125th St / Astoria Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m060scur.pdf">
-			  					M60+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M66"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M66')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 65th &amp; 68th St (East) / 67th &amp; 66th St (West)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m066cur.pdf">
-			  					M66
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M72"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M72')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 72nd St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m072cur.pdf">
-			  					M72
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M79"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M79')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 79th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m079cur.pdf">
-			  					M79
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M86"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M86')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 86th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m086cur.pdf">
-			  					M86
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M86+"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M86+')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="Select Bus Service via 86th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://www.mta.info/nyct/bus/schedule/manh/m086scur.pdf">
-			  					M86+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M96"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M96')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 96th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m096cur.pdf">
-			  					M96
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M98"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M98')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Harlem River Dr / Lexington / 3rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m098cur.pdf">
-			  					M98
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M100"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M100')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Broadway / Amsterdam Av / 125th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m100cur.pdf">
-			  					M100
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M101"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M101')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Third Av / Lexington Av / Amsterdam Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m101cur.pdf">
-			  					M101
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M102"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M102')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 3rd Av / Lexington Av / Lenox Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m102cur.pdf">
-			  					M102
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M103"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M103')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 3rd Av / Lexington Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m103cur.pdf">
-			  					M103
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M104"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M104')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via Broadway / 42nd St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m104cur.pdf">
-			  					M104
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M106"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M106')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 96th St / E 106th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m106cur.pdf">
-			  					M106
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "M116"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('M116')"
-			  							api-route-boro="Manhattan" 
-			  							api-route-desc="via 116th St Crosstown" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/manh/m116cur.pdf">
-			  					M116
-			  				</span>
-			  			
-		  			</div>
-		  			<div class="panel-footer" style="font-weight: 200;"
-		  						id="panel_footer_Manhattan">
-		  				Additional information appears here when you hover over a bus route.
-		  			</div>
-		  		</div>
-	  		
-  				<div class="panel panel-default">
-	  				<div class="panel-heading">
-	  					<b>Queens<b>
-	  				</div>
-	  				<div class="panel-body">
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q1"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q1')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Springfield Blvd / Braddock Av / Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q001cur.pdf">
-			  					Q1
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q2"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q2')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Hollis Av / Belmont Park" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q002cur.pdf">
-			  					Q2
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q3"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q3')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Farmers Blvd / Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q003cur.pdf">
-			  					Q3
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q4"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q4')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Linden Blvd / Merrick Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q004cur.pdf">
-			  					Q4
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q5"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q5')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Merrick Blvd / Green Acres Shop Mall" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q005cur.pdf">
-			  					Q5
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q06"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q06')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Sutphin Blvd / Rockaway Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q006cur.pdf">
-			  					Q06
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q07"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q07')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Rockaway Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q007cur.pdf">
-			  					Q07
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q08"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q08')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 101st Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q008cur.pdf">
-			  					Q08
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q09"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q09')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Van Wyck Expwy / 135th St / Lincoln St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q009cur.pdf">
-			  					Q09
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q10"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q10')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Lefferts Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q010cur.pdf">
-			  					Q10
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q11"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q11')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Woodhaven Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q011cur.pdf">
-			  					Q11
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q12"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q12')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Sanford Av / Northern Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q012cur.pdf">
-			  					Q12
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q13"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q13')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Northern Blvd / Bell Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q013cur.pdf">
-			  					Q13
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q15"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q15')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 150th St / 154th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q015cur.pdf">
-			  					Q15
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q15A"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q15A')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 150th St / Whitestone" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q015cur.pdf">
-			  					Q15A
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q16"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q16')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Bayside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q016cur.pdf">
-			  					Q16
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q17"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q17')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Kissena Blvd / Horace Harding Expwy / 188th St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q017cur.pdf">
-			  					Q17
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q18"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q18')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 65th Pl / 58th St / 30th Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q018cur.pdf">
-			  					Q18
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q19"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q19')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q19
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q20A"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q20A')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 20 Av / Main St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q044cur.pdf">
-			  					Q20A
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q20B"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q20B')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 14 Av / Main St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q044cur.pdf">
-			  					Q20B
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q21"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q21')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Woodhaven Blvd / Cross Bay Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q011cur.pdf">
-			  					Q21
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q22"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q22')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Rockaway Beach Blvd / Beach Channel Dr" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q022cur.pdf">
-			  					Q22
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q23"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q23')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 108th St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q023cur.pdf">
-			  					Q23
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q24"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q24')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Atlantic Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q024cur.pdf">
-			  					Q24
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q25"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q25')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Parsons Blvd/Kissena Blvd/127th St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q25
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q26"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q26')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Hollis Court Blvd / 46th Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q026cur.pdf">
-			  					Q26
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q27"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q27')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Springfield Blvd / Rocky Hill Rd / 46th Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q027cur.pdf">
-			  					Q27
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q28"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q28')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Northern Blvd / 32nd Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q028cur.pdf">
-			  					Q28
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q29"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q29')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Dry Harbor Rd / 80th St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q029cur.pdf">
-			  					Q29
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q30"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q30')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Horace Harding Expwy / Utopia Pkwy" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q030cur.pdf">
-			  					Q30
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q31"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q31')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Bell Blvd / Utopia Pkwy" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q031cur.pdf">
-			  					Q31
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q32"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q32')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Roosevelt Av / Fifth Av / Madison Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q032cur.pdf">
-			  					Q32
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q33"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q33')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Roosevelt Av / 82nd &amp; 83rd St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q033cur.pdf">
-			  					Q33
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q34"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q34')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Parsons / Kissena / Willets Pt Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q34
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q35"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q35')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Flatbush Av / Marine Pkwy Bridge" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q035cur.pdf">
-			  					Q35
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q36"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q36')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Jamaica Av / Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q036cur.pdf">
-			  					Q36
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q37"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q37')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 135th Av / 111st St / Park Ln South" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q037cur.pdf">
-			  					Q37
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q38"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q38')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Penelope Av/Metropolitan Av/Eliot Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q38
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q39"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q39')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Forest Av / 58th St / 48th Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q039cur.pdf">
-			  					Q39
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q40"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q40')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 142nd St / Lakewood Av / Sutphin Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q040cur.pdf">
-			  					Q40
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q41"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q41')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 127th St / 109th Av / Cross Bay Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q041cur.pdf">
-			  					Q41
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q42"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q42')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 174 St / Liberty Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q042cur.pdf">
-			  					Q42
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q43"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q43')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q043cur.pdf">
-			  					Q43
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q44"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q44')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Main St  (Local and Limited-stop Service)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q044cur.pdf">
-			  					Q44
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q46"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q46')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Union Turnpike" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q046cur.pdf">
-			  					Q46
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q47"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q47')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Atlas Mall / 80th St / 74th St Bus Terminal" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q047cur.pdf">
-			  					Q47
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q48"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q48')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Roosevelt Av / 108th St / Ditmars Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q048cur.pdf">
-			  					Q48
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q49"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q49')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 35th Av / 89th &amp; 92nd St / Astoria Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q049cur.pdf">
-			  					Q49
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q50"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q50')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q50
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q52"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q52')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Woodhaven Blvd / Cross Bay Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q052cur.pdf">
-			  					Q52
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q53"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q53')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q53
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q54"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q54')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Jamaica Av / Metropolitan Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q054cur.pdf">
-			  					Q54
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q55"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q55')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Myrtle Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q055cur.pdf">
-			  					Q55
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q56"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q56')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Jamaica Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q056cur.pdf">
-			  					Q56
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q58"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q58')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Fresh Pond Rd / Corona Av / College Pt Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q058cur.pdf">
-			  					Q58
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q59"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q59')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Grand St / Grand Av / Queens Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q059cur.pdf">
-			  					Q59
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q60"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q60')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Sutphin Blvd / Queens Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q060cur.pdf">
-			  					Q60
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q64"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q64')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q64
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q65"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q65')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q65
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q66"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q66')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Northern Blvd / 21st St / Queens Plz" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q66
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q67"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q67')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 69th St / Borden Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q067cur.pdf">
-			  					Q67
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q69"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q69')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 21st St / Ditmars Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q069cur.pdf">
-			  					Q69
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q70"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q70')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 61 St 7 Subway Sta, Woodside Lirr Sta, &amp; Roosevelt Ave/74 St E F M R 7 Subway Sta" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q070cur.pdf">
-			  					Q70
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q72"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q72')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Junction Blvd / 94th St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q072cur.pdf">
-			  					Q72
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q76"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q76')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Francis Lewis Blvd / Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q076cur.pdf">
-			  					Q76
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q77"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q77')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Springfield / Francis Lewis / Hillside Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q077cur.pdf">
-			  					Q77
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q83"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q83')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Murdock Av / Liberty Av (Local and Limited-stop Service) Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q083cur.pdf">
-			  					Q83
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q84"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q84')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Merrick Blvd / 120th Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q084cur.pdf">
-			  					Q84
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q85"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q85')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Merrick Blvd / Conduit Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q085cur.pdf">
-			  					Q85
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q88"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q88')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Horace Harding Expwy / 73rd Av / Springfield Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q088cur.pdf">
-			  					Q88
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q99"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q99')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Jackson Av / 21st St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/queens/q099cur.pdf">
-			  					Q99
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q100"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q100')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 20th Av / 21st St" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q100cur.pdf">
-			  					Q100
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q101"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q101')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules">
-			  					Q101
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q102"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q102')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q102cur.pdf">
-			  					Q102
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q103"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q103')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Vernon Blvd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q103cur.pdf">
-			  					Q103
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q104"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q104')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via 48th St / Broadway" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q104cur.pdf">
-			  					Q104
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q110"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q110')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Jamaica Av / Hempstead Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q110cur.pdf">
-			  					Q110
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q111"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q111')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Guy Brewer Blvd / 147th Av" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q111cur.pdf">
-			  					Q111
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q112"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q112')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Liberty Av / South Rd" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q112cur.pdf">
-			  					Q112
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q113"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q113')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Guy Brewer Blvd / Nassau Expwy" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q113cur.pdf">
-			  					Q113
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "Q114"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('Q114')"
-			  							api-route-boro="Queens" 
-			  							api-route-desc="via Guy Brewer Blvd / Rockaway Tpke" 
-			  							api-agency-id="MTABC" 
-			  							api-route-url="http://www.mta.info/busco/schedules/q113cur.pdf">
-			  					Q114
-			  				</span>
-			  			
-		  			</div>
-		  			<div class="panel-footer" style="font-weight: 200;"
-		  						id="panel_footer_Queens">
-		  				Additional information appears here when you hover over a bus route.
-		  			</div>
-		  		</div>
-	  		
-  				<div class="panel panel-default">
-	  				<div class="panel-heading">
-	  					<b>Staten Island<b>
-	  				</div>
-	  				<div class="panel-body">
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S40"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S40')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Terrace" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s040cur.pdf">
-			  					S40
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S42"
-			  							style="background-color: #00AEEF;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S42')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via St Marks Pl / Jersey St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s052cur.pdf">
-			  					S42
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S44"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S44')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s044cur.pdf">
-			  					S44
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S46"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S46')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Castleton Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s046cur.pdf">
-			  					S46
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S48"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S48')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Forest Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s048cur.pdf">
-			  					S48
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S51"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S51')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Bay St / Father Capodanno Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s051cur.pdf">
-			  					S51
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S52"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S52')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Tompkins Av / Cebra Av / Jersey St" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s052cur.pdf">
-			  					S52
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S53"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S53')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Verrazano-Narrows Bridge / Clove Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s053cur.pdf">
-			  					S53
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S54"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S54')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Manor Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s054cur.pdf">
-			  					S54
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S55"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S55')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Bloomingdale Rd / Annadale Rd / Richmond Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s055cur.pdf">
-			  					S55
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S56"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S56')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Av / Arthur Kill Rd / Foster Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s056cur.pdf">
-			  					S56
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S57"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S57')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Rockland Av / Brielle Av / Bradley Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s057cur.pdf">
-			  					S57
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S59"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S59')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s059cur.pdf">
-			  					S59
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S61"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S61')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Victory Blvd / Bradley Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s061cur.pdf">
-			  					S61
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S62"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S62')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Victory Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s062cur.pdf">
-			  					S62
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S66"
-			  							style="background-color: #6CBE45;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S66')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Victory Blvd / Jewett Av" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s066cur.pdf">
-			  					S66
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S74"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S74')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Rd / Arthur Kill Rd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s074cur.pdf">
-			  					S74
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S76"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S76')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Rd / New Dorp Ln" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s076cur.pdf">
-			  					S76
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S78"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S78')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Hylan Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s078cur.pdf">
-			  					S78
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S79+"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S79+')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="Select Bus Service via Verrazano-Narrows Bridge / Hylan Blvd" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s079scur.pdf">
-			  					S79+
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S81"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S81')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Bay St / Father Capodanno Blvd (S51 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s051cur.pdf">
-			  					S81
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S84"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S84')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Rd / Arthur Kill Rd (S74 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s074cur.pdf">
-			  					S84
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S86"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S86')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Rd / New Dorp Ln (S76 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s076cur.pdf">
-			  					S86
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S89"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S89')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Av (S59 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s089cur.pdf">
-			  					S89
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S90"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S90')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Terrace (S40 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s040cur.pdf">
-			  					S90
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S91"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S91')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Victory Blvd / Bradley Av (S61 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s061cur.pdf">
-			  					S91
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S92"
-			  							style="background-color: #B933AD;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S92')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Victory Blvd (S62 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s062cur.pdf">
-			  					S92
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S93"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S93')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Verrazano-Narrows / Victory" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s093cur.pdf">
-			  					S93
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S94"
-			  							style="background-color: #FAA61A;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S94')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Richmond Av (S44 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s044cur.pdf">
-			  					S94
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S96"
-			  							style="background-color: #006CB7;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S96')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Castleton Av (S46 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s046cur.pdf">
-			  					S96
-			  				</span>
-			  			
-			   				<span class="label bus-lapel" 
-			  							id = "S98"
-			  							style="background-color: #EE352E;
-			  										color: #FFFFFF;" 
-			  							onclick="gotoroute('S98')"
-			  							api-route-boro="Staten Island" 
-			  							api-route-desc="via Forest Av (S48 Limited)" 
-			  							api-agency-id="MTA NYCT" 
-			  							api-route-url="http://web.mta.info/nyct/bus/schedule/staten/s048cur.pdf">
-			  					S98
-			  				</span>
-			  			
-		  			</div>
-		  			<div class="panel-footer" style="font-weight: 200;"
-		  						id="panel_footer_Staten_Island">
-		  				Additional information appears here when you hover over a bus route.
-		  			</div>
-		  		</div>
-	  		
-	  	</div>
+#road li {
+width: 70px;
+height: 10px;
+background-color: #5f555e ; 
+float: left;
+margin-top: 55px;
+margin-right: 63px;
+overflow: hidden;
+}
 
-  	</div>
+#grass {
+border-bottom: 50px solid #70a155;
+border-left: 50px solid transparent;
+height: 0;
+width: 80%;
+position: absolute;
+right: 0;
+top: 350px
 
-  	<center>
-	  	<p style="font-weight: 200;">
-	  		Special thanks to <a href="https://twitter.com/MicrosoftNY">@MicrosoftNY</a> for hosting this project.
-	  	</p>
-  	</center>
 
-  </body>
-	<script>
-		// Globals
-		var routes = [];
+}
 
-		window.onload = function () {
-			$(".bus-lapel").each(function (r) {
-				r = $(".bus-lapel")[r];
-				routes.push(r.getAttribute("id"));
-			});
 
-			$(".bus-lapel").hover(function (r) {
-				try {
-					var boro = r.toElement.getAttribute("api-route-boro");
-					var desc = r.toElement.getAttribute("api-route-desc");
-					var agency_id = r.toElement.getAttribute("api-agency-id");
-					var route_url = r.toElement.getAttribute("api-route-url");
+#block1 {
+width:100px;
+height:70px;
+background-color: #995a50;
+position:absolute;
+left: 170px;
+top: 232px;
+border-top: 3px solid #fff;
+}
 
-					var blurb = [];
-					if (agency_id) blurb.push("Agency: " + agency_id);
-					if (desc) blurb.push("Route description: " + desc);
-					if (route_url) blurb.push("Route url: " + route_url);
-					$("#panel_footer_" + boro.replace(" ", "_"))[0].innerText = blurb.join("\n")
-				} catch (e) {}
-			});
+#block2 {
+width:100px;
+height:70px;
+background-color: #995a50;
+position:absolute;
+left: 170px;
+top: 159px;
+border-top: 3px solid #fff;
+}
 
-		$('#routes_search .typeahead')
-			.typeahead( {hint: true, highlight: true, minLength: 1}, 
-									{name: 'routes', source: substringMatcher(routes)});
-		};
 
-		// UTILITIES
-		var substringMatcher = function(strs) {
-		  return function findMatches(q, cb) {
-		    var matches = [];
-		    var substrRegex = new RegExp(q, 'i');
-		    $.each(strs, function(i, str) {
-		      if (substrRegex.test(str)) { matches.push(str); }
-		    });
-		    cb(matches);
-		  };
-		};
+#bus {
+width: 410px;
+position:fixed;
+animation: bus 7s ease-in-out infinite;
+bottom: 45px;
+background-color: red
+}
 
-		function gotoroute (rt) {
-			if (rt == undefined) {
-				rt = $("#route-query")[0].value;
-			}
-			window.location.replace("http://104.208.241.41/routes/" + rt);
-		};
+#busMiddel {
+width: 410px;
+height: 65px; 
+background-color: #eaeaea;
+border-bottom: 10px inset #0676f4;
+box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+}
 
-		function godevportal () {
-			window.location.replace("http://104.208.241.41/developer");
-		};
+#busWindowsMiddle {
+width: 366px;
+height: 50px;
+background-color: #658492;
+margin: 25px 0 0 34px;
+position: absolute;
+border-top: 10px inset #86A7C2;
+border-left: 10px inset #86A7C2;  
+}
+
+.busWindowsShadow {
+width: 10px;
+height: 50px;
+margin-left: 40px;
+border-left: 14px inset #86A7C2;
+}
+
+.busWindowsShadow1 {
+width: 10px;
+height: 50px;
+margin-left: 105px;
+margin-top: -50px;
+border-left: 14px inset #86A7C2;
+}
+
+.busWindowsShadow2 {
+width: 10px;
+height: 50px;
+margin-left: 165px;
+margin-top: -50px;
+border-left: 14px inset #86A7C2;
+}
+
+.busWindowsShadow3 {
+width: 10px;
+height: 50px;
+margin-left: 225px;
+margin-top: -50px;
+border-left: 14px inset #86A7C2;
+}
+
+.busWindowsShadow4 {
+width: 10px;
+height: 93px;
+margin-left: 310px;
+margin-top: -50px;
+border-left: 34px inset #86A7C2;
+}
+
+#busBottom {
+width: 410px;
+height: 40px;
+background-color: #eaeaea;
+border-top: 20px inset #0676f4;
+box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
+}
+
+
+#busWindowsBottom {
+width: 35px;
+height: 90px;
+background-color: #658492;
+margin: -60px 0 0 340px;
+position: absolute;
+border-left: 10px inset #86A7C2;
+}
+
+#wheelLeft {
+width: 30px;
+height: 30px;
+background-color: #514552;
+border-radius: 50%;
+border: 10px #3a3040 solid;
+position: absolute;
+margin: -30px 0 0 100px;
+}
+
+#wheelRight {
+width: 30px;
+height: 30px;
+background-color: #514552;
+border-radius: 50%;
+border: 10px #3a3040 solid;
+position: absolute;
+margin: -30px 0 0 310px;
+}
+
+@keyframes bus {
+from {
+margin-left: -410px;
+}
+to {
+margin-left: 100%;
+}
+}
+
+
+/* clouds */
+
+#clouds{
+	padding: 100px 0;
+	background: #c9dbe9;
+	background: -webkit-linear-gradient(top, #c9dbe9 0%, #fff 100%);
+	background: -linear-gradient(top, #c9dbe9 0%, #fff 100%);
+	background: -moz-linear-gradient(top, #c9dbe9 0%, #fff 100%);
+	height: 100%
+}
+
+/*Time to finalise the cloud shape*/
+.cloud {
+	width: 200px; height: 60px;
+	background: #fff;
+	
+	border-radius: 200px;
+	-moz-border-radius: 200px;
+	-webkit-border-radius: 200px;
+	
+	position: relative; 
+}
+
+.cloud:before, .cloud:after {
+	content: '';
+	position: absolute; 
+	background: #fff;
+	width: 100px; height: 80px;
+	position: absolute; top: -15px; left: 10px;
+	
+	border-radius: 100px;
+	-moz-border-radius: 100px;
+	-webkit-border-radius: 100px;
+	
+	-webkit-transform: rotate(30deg);
+	transform: rotate(30deg);
+	-moz-transform: rotate(30deg);
+}
+
+.cloud:after {
+	width: 120px; height: 120px;
+	top: -55px; left: auto; right: 15px;
+}
+
+/*Time to animate*/
+.x1 {
+	-webkit-animation: moveclouds 15s linear infinite;
+	-moz-animation: moveclouds 15s linear infinite;
+	-o-animation: moveclouds 15s linear infinite;
+}
+
+/*variable speed, opacity, and position of clouds for realistic effect*/
+.x2 {
+	left: 200px;
+	
+	-webkit-transform: scale(0.6);
+	-moz-transform: scale(0.6);
+	transform: scale(0.6);
+	opacity: 0.6; /*opacity proportional to the size*/
+	
+	/*Speed will also be proportional to the size and opacity*/
+	/*More the speed. Less the time in 's' = seconds*/
+	-webkit-animation: moveclouds 25s linear infinite;
+	-moz-animation: moveclouds 25s linear infinite;
+	-o-animation: moveclouds 25s linear infinite;
+}
+
+.x3 {
+	left: -250px; top: -200px;
+	
+	-webkit-transform: scale(0.8);
+	-moz-transform: scale(0.8);
+	transform: scale(0.8);
+	opacity: 0.8; /*opacity proportional to the size*/
+	
+	-webkit-animation: moveclouds 20s linear infinite;
+	-moz-animation: moveclouds 20s linear infinite;
+	-o-animation: moveclouds 20s linear infinite;
+}
+
+.x4 {
+	left: 470px; top: -250px;
+	
+	-webkit-transform: scale(0.75);
+	-moz-transform: scale(0.75);
+	transform: scale(0.75);
+	opacity: 0.75; /*opacity proportional to the size*/
+	
+	-webkit-animation: moveclouds 18s linear infinite;
+	-moz-animation: moveclouds 18s linear infinite;
+	-o-animation: moveclouds 18s linear infinite;
+}
+
+.x5 {
+	left: -150px; top: -150px;
+	
+	-webkit-transform: scale(0.8);
+	-moz-transform: scale(0.8);
+	transform: scale(0.8);
+	opacity: 0.8; /*opacity proportional to the size*/
+	
+	-webkit-animation: moveclouds 20s linear infinite;
+	-moz-animation: moveclouds 20s linear infinite;
+	-o-animation: moveclouds 20s linear infinite;
+}
+
+@-webkit-keyframes moveclouds {
+	0% {margin-left: 1000px;}
+	100% {margin-left: -1000px;}
+}
+@-moz-keyframes moveclouds {
+	0% {margin-left: 1000px;}
+	100% {margin-left: -1000px;}
+}
+@-o-keyframes moveclouds {
+	0% {margin-left: 1000px;}
+	100% {margin-left: -1000px;}
+}
+</style>
+
+
+<script src="js/prefixfree.min.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="clouds">
+	<div class="cloud x1"></div>
+	<!-- Time for multiple clouds to dance around -->
+	<div class="cloud x2"></div>
+	<div class="cloud x3"></div>
+	<div class="cloud x4"></div>
+	<div class="cloud x5"></div>
+</div>
+
+
+<div id="title">
+	<center>
+		<p style="font-size:7vw;margin-top:0px;margin-bottom:0px;">
+			New York City
+		</p>
+		<p style="font-size:16vw;margin-top:0px;margin-bottom:0px;">
+			Bus Data API
+		</p>
+		<a href="http://busdataapi1.cloudapp.net/" style="text-decoration:none;background-color:#bddfeb;padding:10px;border-radius:4px">
+			CLICK TO ENTER
+		</a>
+	</center>
+</div>
+
+<div id="road">
+<ul>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ul>
+</div>
+
+<div id="bus">
+<div id="busMiddel">
+<div id="busWindowsMiddle">
+<div class="busWindowsShadow"></div>
+<div class="busWindowsShadow1"></div>
+<div class="busWindowsShadow2"></div>
+<div class="busWindowsShadow3"></div>
+<div class="busWindowsShadow4"></div>
+</div>
+</div>
+<div id="busBottom"><div id="busWindowsBottom"></div></div>
+<div id="wheelLeft"></div>
+<div id="wheelRight"></div>
+</div>
 
 
 
-	</script>
+
+
+</body>
 </html>
-
-
