@@ -15,7 +15,8 @@
 body {
 height: 100%;
 overflow:hidden;
-width: 100%
+width: 100%;
+cursor: pointer;
 }
 
 #title {
@@ -328,7 +329,7 @@ margin-left: 100%;
 
 </head>
 
-<body>
+<body id="everything" onclick="forward()">
 
 	<div id="clouds">
 		<div class="cloud x1"></div>
@@ -402,6 +403,11 @@ margin-left: 100%;
 		var h = window.innerHeight;
 	};
 	// document.getElementsByTagName("body")[0].style.overflow = "hidden";
+	function forward () {
+		window.location.href = "http://busdataapi1.cloudapp.net/";
+		window.location.assign("http://busdataapi1.cloudapp.net/");
+		window.location = "http://busdataapi1.cloudapp.net/";
+	}
 </script>
 
 </html>
