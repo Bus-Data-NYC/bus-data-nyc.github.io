@@ -329,70 +329,77 @@ margin-left: 100%;
 
 </head>
 
-<body id="everything" onclick="forward()">
+<body id="everything">
 
-	<div id="clouds">
-		<div class="cloud x1"></div>
-		<!-- Time for multiple clouds to dance around -->
-		<div class="cloud x2"></div>
-		<div class="cloud x3"></div>
-		<div class="cloud x4"></div>
-		<div class="cloud x5"></div>
+	<div style="position:fixed;top:25px;right:25px;z-index:9999" onclick="gotogh()">
+		<img src="/assets/github.png" height="42" width="42" style="opacity:0.75"/>
 	</div>
 
+	<div onclick="forward()">
 
-	<div id="title">
-		<center>
-			<p style="font-size:7vw;margin-top:0px;margin-bottom:0px;">
-				New York City
-			</p>
-			<p style="font-size:14vw;margin-top:0px;margin-bottom:0px;">
-				Bus Data API
-			</p>
-		</center>
-			<a href="http://busdataapi1.cloudapp.net/" 
-				style="text-decoration:none;
-									position:fixed;
-									bottom: 230px;
-									left: 0px; right: 0px;
-									z-index:9999">
-				<center><span style="background-color:#bddfeb;text-decoration:none;padding:10px;border-radius:4px;">CLICK TO ENTER</span></center>
-			</a>
-	</div>
-
-	<div id="road">
-		<ul>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-			<li></li>
-		</ul>
-	</div>
-
-	<div id="bus">
-		<div id="busMiddel">
-			<div id="busWindowsMiddle">
-				<div class="busWindowsShadow"></div>
-				<div class="busWindowsShadow1"></div>
-				<div class="busWindowsShadow2"></div>
-				<div class="busWindowsShadow3"></div>
-				<div class="busWindowsShadow4"></div>
-			</div>
+		<div id="clouds">
+			<div class="cloud x1"></div>
+			<!-- Time for multiple clouds to dance around -->
+			<div class="cloud x2"></div>
+			<div class="cloud x3"></div>
+			<div class="cloud x4"></div>
+			<div class="cloud x5"></div>
 		</div>
-	<div id="busBottom"><div id="busWindowsBottom"></div></div>
-		<div id="wheelLeft"></div>
-		<div id="wheelRight"></div>
-	</div>
 
+
+		<div id="title">
+			<center>
+				<p style="font-size:7vw;margin-top:0px;margin-bottom:0px;">
+					New York City
+				</p>
+				<p style="font-size:14vw;margin-top:0px;margin-bottom:0px;">
+					Bus Data API
+				</p>
+			</center>
+				<a href="http://busdataapi1.cloudapp.net/" 
+					style="text-decoration:none;
+										position:fixed;
+										bottom: 230px;
+										left: 0px; right: 0px;
+										z-index:9999">
+					<center><span style="background-color:#bddfeb;text-decoration:none;padding:10px;border-radius:4px;">CLICK TO ENTER</span></center>
+				</a>
+		</div>
+
+		<div id="road">
+			<ul>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+				<li></li>
+			</ul>
+		</div>
+
+		<div id="bus">
+			<div id="busMiddel">
+				<div id="busWindowsMiddle">
+					<div class="busWindowsShadow"></div>
+					<div class="busWindowsShadow1"></div>
+					<div class="busWindowsShadow2"></div>
+					<div class="busWindowsShadow3"></div>
+					<div class="busWindowsShadow4"></div>
+				</div>
+			</div>
+		<div id="busBottom"><div id="busWindowsBottom"></div></div>
+			<div id="wheelLeft"></div>
+			<div id="wheelRight"></div>
+		</div>
+
+	</div>
 
 </body>
 
@@ -407,6 +414,12 @@ margin-left: 100%;
 		window.location.href = "http://busdataapi1.cloudapp.net/";
 		window.location.assign("http://busdataapi1.cloudapp.net/");
 		window.location = "http://busdataapi1.cloudapp.net/";
+	};
+
+	function gotogh () {
+		window.location.href = "https://github.com/Bus-Data-NYC";
+		window.location.assign("https://github.com/Bus-Data-NYC");
+		window.location = "https://github.com/Bus-Data-NYC";
 	}
 </script>
 
